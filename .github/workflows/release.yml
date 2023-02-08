@@ -92,26 +92,8 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
-  # build-darwin-secret:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     my-secret-exists: ${{ steps.my-secret-check.outputs.defined }}
-  #   steps:
-  #     - name: Check for Secret availability
-  #       id: my-secret-check
-  #       # perform secret check & put boolean result as an output
-  #       shell: bash
-  #       run: |
-  #         if [[ -n "${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}" ]]; then
-  #           echo "defined=true" >> $GITHUB_OUTPUT;
-  #         else
-  #           echo "defined=false" >> $GITHUB_OUTPUT;
-  #         fi
-
   build-darwin:
     runs-on: macos-latest
-    # needs: build-darwin-secret
-    # if: ${{ needs.build-darwin-secret.outputs.my-secret-exists }}
     steps:
       - name: import distribution cert
         uses: apple-actions/import-codesign-certs@v1
