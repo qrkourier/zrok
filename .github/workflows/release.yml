@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*.*.*'
 
+# grant write permission to GITHUB_TOKEN for goreleaser
+permissions:
+  contents: write
+
 jobs:
   build-linux:
     runs-on: ubuntu-20.04
@@ -47,10 +51,10 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
-  build-linux-arm:
+  build-linux-arm64:
     runs-on: ubuntu-20.04
     steps:
-      - run: sudo apt-get install gcc-arm-linux-gnueabi
+      - run: sudo apt-get install gcc-aarch64-linux-gnu
 
       - uses: actions/checkout@v3
         with:
@@ -79,7 +83,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --skip-publish --config .goreleaser-linux-arm.yml
+          args: release --skip-publish --config .goreleaser-linux-arm64.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -88,8 +92,26 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
+  # build-darwin-secret:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     my-secret-exists: ${{ steps.my-secret-check.outputs.defined }}
+  #   steps:
+  #     - name: Check for Secret availability
+  #       id: my-secret-check
+  #       # perform secret check & put boolean result as an output
+  #       shell: bash
+  #       run: |
+  #         if [[ -n "${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}" ]]; then
+  #           echo "defined=true" >> $GITHUB_OUTPUT;
+  #         else
+  #           echo "defined=false" >> $GITHUB_OUTPUT;
+  #         fi
+
   build-darwin:
     runs-on: macos-latest
+    # needs: build-darwin-secret
+    # if: ${{ needs.build-darwin-secret.outputs.my-secret-exists }}
     steps:
       - name: import distribution cert
         uses: apple-actions/import-codesign-certs@v1
@@ -181,7 +203,7 @@ jobs:
           path: ./dist/*.gz
 
   publish-release:
-    needs: [build-linux, build-linux-arm, build-darwin, build-windows]
+    needs: [build-linux, build-linux-arm64, build-darwin, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
