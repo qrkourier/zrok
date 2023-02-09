@@ -95,7 +95,7 @@ jobs:
             ARTIFACTS_DIR=./dist
           push: true
 
-      # - name: Set Up Container Image Tags for Controller Container
+      # - name: Set Up Container Image Tags for zrok Controller Container
       #   env:
       #     RELEASE_REPO: openziti/zrok-controller
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
@@ -120,24 +120,68 @@ jobs:
       #       ZROK_VERSION=${{ env.ZROK_VERSION }}
       #     push: true
 
-      # - name: Set Up Container Image Tags for Router Container
+      # - name: Set Up Container Image Tags for zrok Frontend Container
       #   env:
       #     RELEASE_REPO: openziti/zrok-frontend
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
-      #   id: tagprep_router
+      #   id: tagprep_frontend
       #   run: |
       #     DOCKER_TAGS=""
       #     DOCKER_TAGS="${RELEASE_REPO}:${ZROK_VERSION},${RELEASE_REPO}:latest"
       #     echo "DEBUG: DOCKER_TAGS=${DOCKER_TAGS}"
       #     echo DOCKER_TAGS="${DOCKER_TAGS}" >> $GITHUB_OUTPUT
 
-      # - name: Build & Push Multi-Platform Router Container Image to Hub
+      # - name: Build & Push Multi-Platform Frontend Container Image to Hub
       #   uses: docker/build-push-action@v3
       #   with:
       #     builder: ${{ steps.buildx.outputs.name }}
       #     context: ${{ github.workspace }}/docker-images/zrok-frontend/
       #     platforms: linux/amd64,linux/arm64
-      #     tags: ${{ steps.tagprep_router.outputs.DOCKER_TAGS }}
+      #     tags: ${{ steps.tagprep_frontend.outputs.DOCKER_TAGS }}
+      #     build-args: |
+      #       ZROK_VERSION=${{ env.ZROK_VERSION }}
+      #     push: true
+
+      # - name: Set Up Container Image Tags for zrok Share Container
+      #   env:
+      #     RELEASE_REPO: openziti/zrok-share
+      #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
+      #   id: tagprep_share
+      #   run: |
+      #     DOCKER_TAGS=""
+      #     DOCKER_TAGS="${RELEASE_REPO}:${ZROK_VERSION},${RELEASE_REPO}:latest"
+      #     echo "DEBUG: DOCKER_TAGS=${DOCKER_TAGS}"
+      #     echo DOCKER_TAGS="${DOCKER_TAGS}" >> $GITHUB_OUTPUT
+
+      # - name: Build & Push Multi-Platform zrok Share Container Image to Hub
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     context: ${{ github.workspace }}/docker-images/zrok-share/
+      #     platforms: linux/amd64,linux/arm64
+      #     tags: ${{ steps.tagprep_share.outputs.DOCKER_TAGS }}
+      #     build-args: |
+      #       ZROK_VERSION=${{ env.ZROK_VERSION }}
+      #     push: true
+
+      # - name: Set Up Container Image Tags for zrok Access Container
+      #   env:
+      #     RELEASE_REPO: openziti/zrok-access
+      #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
+      #   id: tagprep_access
+      #   run: |
+      #     DOCKER_TAGS=""
+      #     DOCKER_TAGS="${RELEASE_REPO}:${ZROK_VERSION},${RELEASE_REPO}:latest"
+      #     echo "DEBUG: DOCKER_TAGS=${DOCKER_TAGS}"
+      #     echo DOCKER_TAGS="${DOCKER_TAGS}" >> $GITHUB_OUTPUT
+
+      # - name: Build & Push Multi-Platform zrok Access Container Image to Hub
+      #   uses: docker/build-push-action@v3
+      #   with:
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     context: ${{ github.workspace }}/docker-images/zrok-access/
+      #     platforms: linux/amd64,linux/arm64
+      #     tags: ${{ steps.tagprep_access.outputs.DOCKER_TAGS }}
       #     build-args: |
       #       ZROK_VERSION=${{ env.ZROK_VERSION }}
       #     push: true
