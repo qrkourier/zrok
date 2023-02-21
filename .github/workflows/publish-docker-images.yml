@@ -71,7 +71,7 @@ jobs:
 
       - name: Set Up Container Image Tags for zrok CLI Container
         env:
-          RELEASE_REPO: openziti/zrok
+          RELEASE_REPO: kbinghamnetfoundry/zrok
           ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
         id: tagprep_cli
         run: |
@@ -97,7 +97,7 @@ jobs:
 
       # - name: Set Up Container Image Tags for zrok Controller Container
       #   env:
-      #     RELEASE_REPO: openziti/zrok-controller
+      #     RELEASE_REPO: kbinghamnetfoundry/zrok-controller
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
       #   id: tagprep_ctrl
       #   run: |
@@ -122,7 +122,7 @@ jobs:
 
       # - name: Set Up Container Image Tags for zrok Frontend Container
       #   env:
-      #     RELEASE_REPO: openziti/zrok-frontend
+      #     RELEASE_REPO: kbinghamnetfoundry/zrok-frontend
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
       #   id: tagprep_frontend
       #   run: |
@@ -144,7 +144,7 @@ jobs:
 
       # - name: Set Up Container Image Tags for zrok Share Container
       #   env:
-      #     RELEASE_REPO: openziti/zrok-share
+      #     RELEASE_REPO: kbinghamnetfoundry/zrok-share
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
       #   id: tagprep_share
       #   run: |
@@ -166,7 +166,7 @@ jobs:
 
       # - name: Set Up Container Image Tags for zrok Access Container
       #   env:
-      #     RELEASE_REPO: openziti/zrok-access
+      #     RELEASE_REPO: kbinghamnetfoundry/zrok-access
       #     ZROK_VERSION: ${{ steps.semver.outputs.zrok_semver }}
       #   id: tagprep_access
       #   run: |
