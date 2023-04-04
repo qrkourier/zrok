@@ -54,6 +54,7 @@ jobs:
           if-no-files-found: error
   # build a release candidate container image for branches named "main" or like "v*"
   rc-container-build:
+    needs: ubuntu-build
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/v')
     name: Build Release Candidate Container Image
     runs-on: ubuntu-latest
