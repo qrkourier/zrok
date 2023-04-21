@@ -133,6 +133,47 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
+  build-linux-armv6:
+    runs-on: ubuntu-20.04
+    steps:
+      - run: sudo apt-get install gcc-arm-linux-gnueabi
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.19.3'
+          cache: true
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - run: npm install
+        working-directory: ui
+
+      - run: npm run build
+        working-directory: ui
+        env:
+          CI: ""
+
+      - uses: goreleaser/goreleaser-action@v3
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --skip-publish --config .goreleaser-linux-armv6.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release-builds
+          path: ./dist/*.gz
+
   build-darwin:
     # require a signing certificate if running in openziti upstream and allow
     # forks to build for macOS by supplying a signing certificate
@@ -231,10 +272,13 @@ jobs:
           path: ./dist/*.gz
 
   publish-release:
+    # always() has the effect of re-enabling evaluating conditionals after a job was skipped;
+    # this is necessary because the build-darwin job is skipped if the signing certificate is
+    # not available, such as in a fork
     if: |
       always()
       && (needs.build-darwin.result == 'success' || needs.build-darwin.result == 'skipped')
-    needs: [build-linux-amd64, build-linux-armv7, build-linux-armv8, build-darwin, build-windows]
+    needs: [build-linux-amd64, build-linux-armv6, build-linux-armv7, build-linux-armv8, build-darwin, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
