@@ -175,12 +175,12 @@ jobs:
           path: ./dist/*.gz
 
   build-darwin:
-    # require a signing certificate if running in openziti upstream and allow
-    # forks to build for macOS by supplying a signing certificate
-    if: ${{ github.repository_owner == 'openziti' || env.p12_file_base64 != null }}
+    # require a signing certificate if running in openziti upstream repo; this
+    # does not allow a repo fork to build for darwin, but you could enable that
+    # by adding `|| vars.ZROK_SKIP_MACOS_BUILD != 'true'` in keeping with ziti's
+    # build skip vars convention
+    if: github.repository_owner == 'openziti'
     runs-on: macos-latest
-    env:
-      p12_file_base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
     steps:
       - name: import distribution cert
         uses: apple-actions/import-codesign-certs@v1
