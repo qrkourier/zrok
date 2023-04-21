@@ -38,7 +38,7 @@ jobs:
         env:
           CI: ""
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: latest
@@ -51,7 +51,7 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
-  build-linux-arm64:
+  build-linux-armv8:
     runs-on: ubuntu-20.04
     steps:
       - run: sudo apt-get install gcc-aarch64-linux-gnu
@@ -79,11 +79,11 @@ jobs:
         env:
           CI: ""
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: latest
-          args: release --skip-publish --config .goreleaser-linux-arm64.yml
+          args: release --skip-publish --config .goreleaser-linux-armv8.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -92,7 +92,7 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
-  build-linux-arm:
+  build-linux-armv7:
     runs-on: ubuntu-20.04
     steps:
       - run: sudo apt-get install gcc-arm-linux-gnueabi
@@ -120,11 +120,11 @@ jobs:
         env:
           CI: ""
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: latest
-          args: release --skip-publish --config .goreleaser-linux-armhf.yml
+          args: release --skip-publish --config .goreleaser-linux-armv7.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -134,6 +134,11 @@ jobs:
           path: ./dist/*.gz
 
   build-darwin:
+    # require a signing certificate if running in openziti upstream and allow
+    # forks to build for macOS by supplying a signing certificate
+    if: github.repository_owner == 'openziti' || env.p12_file_base64 != null
+    env:
+      p12_file_base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
     runs-on: macos-latest
     steps:
       - name: import distribution cert
@@ -169,7 +174,7 @@ jobs:
         env:
           CI: ""
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: latest
@@ -212,7 +217,7 @@ jobs:
         env:
           CI: ""
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
           version: latest
@@ -226,7 +231,10 @@ jobs:
           path: ./dist/*.gz
 
   publish-release:
-    needs: [build-linux-amd64, build-linux-arm, build-linux-arm64, build-darwin, build-windows]
+    if: |
+      always()
+      && (needs.build-darwin.result == 'success' || needs.build-darwin.result == 'skipped')
+    needs: [build-linux-amd64, build-linux-armv7, build-linux-armv8, build-darwin, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
