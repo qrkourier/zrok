@@ -178,9 +178,9 @@ jobs:
     # require a signing certificate if running in openziti upstream and allow
     # forks to build for macOS by supplying a signing certificate
     if: ${{ github.repository_owner == 'openziti' || env.p12_file_base64 != null }}
+    runs-on: macos-latest
     env:
       p12_file_base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
-    runs-on: macos-latest
     steps:
       - name: import distribution cert
         uses: apple-actions/import-codesign-certs@v1
