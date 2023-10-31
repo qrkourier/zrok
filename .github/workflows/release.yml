@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+env:
+  ZITI_DEB_PROD_REPO: ${{ vars.ZITI_DEB_PROD_REPO || 'zitipax-openziti-deb-stable' }}
+  ZITI_RPM_PROD_REPO: ${{ vars.ZITI_RPM_PROD_REPO || 'zitipax-openziti-rpm-stable' }}
+
 jobs:
   build-linux-amd64:
     runs-on: ubuntu-20.04
@@ -39,7 +43,7 @@ jobs:
         env:
           CI: "true"
 
-      - uses: goreleaser/goreleaser-action@v2
+      - uses: goreleaser/goreleaser-action@v5
         with:
           distribution: goreleaser
           version: latest
@@ -51,6 +55,34 @@ jobs:
         with:
           name: release-builds
           path: ./dist/*.gz
+
+      - name: Configure jFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
+
+      - name: Upload RPM to Artifactory release repo
+        shell: bash
+        run: >
+          for RPM in ./dist/*.rpm; do
+            jf rt upload
+            "$RPM"
+            ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/
+            --recursive=false
+            --flat=true
+          done
+
+      - name: Upload DEB to Artifactory release repo
+        shell: bash
+        run: >
+          for DEB in ./dist/*.deb; do
+            jf rt upload
+            "$DEB"
+            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/amd64/
+            --deb=debian/main/amd64
+            --recursive=false
+            --flat=true
+          done
 
   build-linux-arm64:
     runs-on: ubuntu-20.04
