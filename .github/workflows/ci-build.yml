@@ -10,6 +10,10 @@ on:
       - 'docs/**'
       - 'website/**'
 
+# cancel older, redundant builds that haven't started yet
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   ubuntu-build:
     name: Build Linux AMD64 CLI
