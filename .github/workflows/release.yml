@@ -63,25 +63,21 @@ jobs:
 
       - name: Upload RPM to Artifactory release repo
         shell: bash
-        run: >
+        run: |
           for RPM in ./dist/*.rpm; do
-            jf rt upload
-            "$RPM"
-            ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/
-            --recursive=false
-            --flat=true
+            jf rt upload --recursive=false --flat=true \
+              "$RPM" \
+              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/ \
           done
 
       - name: Upload DEB to Artifactory release repo
         shell: bash
         run: >
           for DEB in ./dist/*.deb; do
-            jf rt upload
-            "$DEB"
+            jf rt upload --recursive=false --flat=true \
+            --deb=debian/main/amd64 \
+            "$DEB" \
             ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/amd64/
-            --deb=debian/main/amd64
-            --recursive=false
-            --flat=true
           done
 
   build-linux-arm64:
