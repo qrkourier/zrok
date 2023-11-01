@@ -12,6 +12,7 @@ permissions:
 env:
   ZITI_DEB_PROD_REPO: ${{ vars.ZITI_DEB_PROD_REPO || 'zitipax-openziti-deb-stable' }}
   ZITI_RPM_PROD_REPO: ${{ vars.ZITI_RPM_PROD_REPO || 'zitipax-openziti-rpm-stable' }}
+  JFROG_CLI_VERSION: ${{ vars.JFROG_CLI_VERSION || '2.50.4' }}
 
 jobs:
   build-linux-amd64:
@@ -59,7 +60,7 @@ jobs:
       - name: Configure jFrog CLI
         uses: jfrog/setup-jfrog-cli@v3
         with:
-          version: "2.50.4"
+          version: ${{ env.JFROG_CLI_VERSION }}
         env:
           JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
 
@@ -126,6 +127,34 @@ jobs:
           name: release-builds
           path: ./dist/*.gz
 
+      - name: Configure jFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        with:
+          version: ${{ env.JFROG_CLI_VERSION }}
+        env:
+          JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
+
+      - name: Upload RPM to Artifactory release repo
+        shell: bash
+        run: |
+          for RPM in ./dist/*.rpm; do
+            echo "INFO: Uploading $RPM"
+            jf rt upload --recursive=false --flat=true \
+              "$RPM" \
+              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/aarch64/
+          done
+
+      - name: Upload DEB to Artifactory release repo
+        shell: bash
+        run: >
+          for DEB in ./dist/*.deb; do
+            echo "INFO: Uploading $DEB"
+            jf rt upload --recursive=false --flat=true \
+            --deb=debian/main/arm64 \
+            "$DEB" \
+            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/arm64/
+          done
+
   build-linux-arm:
     runs-on: ubuntu-20.04
     steps:
@@ -167,6 +196,34 @@ jobs:
         with:
           name: release-builds
           path: ./dist/*.gz
+
+      - name: Configure jFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        with:
+          version: ${{ env.JFROG_CLI_VERSION }}
+        env:
+          JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
+
+      - name: Upload RPM to Artifactory release repo
+        shell: bash
+        run: |
+          for RPM in ./dist/*.rpm; do
+            echo "INFO: Uploading $RPM"
+            jf rt upload --recursive=false --flat=true \
+              "$RPM" \
+              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/armv7/
+          done
+
+      - name: Upload DEB to Artifactory release repo
+        shell: bash
+        run: >
+          for DEB in ./dist/*.deb; do
+            echo "INFO: Uploading $DEB"
+            jf rt upload --recursive=false --flat=true \
+            --deb=debian/main/armv7 \
+            "$DEB" \
+            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/armv7/
+          done
 
   build-darwin:
     if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_MACOS_BUILD == 'false'
