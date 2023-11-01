@@ -67,7 +67,7 @@ jobs:
           for RPM in ./dist/*.rpm; do
             jf rt upload --recursive=false --flat=true \
               "$RPM" \
-              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/ \
+              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/
           done
 
       - name: Upload DEB to Artifactory release repo
