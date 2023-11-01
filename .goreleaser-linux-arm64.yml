@@ -27,7 +27,7 @@ nfpms:
 
     # Build IDs for the builds you want to create NFPM packages for.
     builds:
-      - zrok-cli
+      - zrok-armv8
 
     # Formats to be generated.
     formats:

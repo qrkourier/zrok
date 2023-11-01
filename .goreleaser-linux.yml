@@ -1,5 +1,5 @@
 builds:
-- id: zrok-cli
+- id: zrok-amd64
   main: ./cmd/zrok
   binary: zrok
   ldflags: "-s -w -X github.com/openziti/zrok/build.Version={{.Tag}} -X github.com/openziti/zrok/build.Hash={{.ShortCommit}}"
@@ -23,7 +23,7 @@ nfpms:
 
     # Build IDs for the builds you want to create NFPM packages for.
     builds:
-      - zrok-cli
+      - zrok-amd64
 
     # Formats to be generated.
     formats:
