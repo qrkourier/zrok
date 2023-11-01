@@ -1,3 +1,0 @@
-Your account is nearing a transfer size limit, {{ .EmailAddress }}!
-
-{{ .Detail }}
