@@ -7,8 +7,8 @@ Type=simple
 DynamicUser=yes
 StateDirectory=zrok-share
 UMask=0007
-ExecStartPre=/opt/openziti/bin/zrok-enable.bash /opt/openziti/var/zrok/zrok-share.env
-ExecStart=/opt/openziti/bin/zrok-share.bash /opt/openziti/var/zrok/zrok-share.env
+ExecStartPre=/opt/openziti/bin/zrok-enable.bash /opt/openziti/etc/zrok/zrok-share.env
+ExecStart=/opt/openziti/bin/zrok-share.bash /opt/openziti/etc/zrok/zrok-share.env
 Restart=always
 RestartSec=3
 

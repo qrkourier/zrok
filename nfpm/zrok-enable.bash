@@ -18,12 +18,15 @@ if (( $# )); then
     exit 1
   fi
 else
-  if [[ -s /opt/openziti/etc/zrok.env ]]; then
-    source /opt/openziti/etc/zrok.env
-  else
-    echo "ERROR: need /opt/openziti/etc/zrok.env or filename argument to read environment configuration" >&2
-    exit 1
-  fi
+  # TODO: consider defining a default environment file
+  # if [[ -s /opt/openziti/etc/zrok.env ]]; then
+  #   source /opt/openziti/etc/zrok.env
+  # else
+  #   echo "ERROR: need /opt/openziti/etc/zrok.env or filename argument to read share configuration" >&2
+  #   exit 1
+  # fi
+  echo "ERROR: need filename argument to read env configuration" >&2
+  exit 1
 fi
 
 if [[ -s ~/.zrok/environment.json ]]; then

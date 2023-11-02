@@ -96,12 +96,13 @@ nfpms:
 
     # Contents to add to the package.
     contents:
-      - dst: /opt/openziti/var/zrok
+      - dst: /lib/systemd/system/
+        src: ./nfpm/zrok-share.service
+
+      - dst: /opt/openziti/etc/zrok
         type: dir
         file_info:
-          mode: 0700
-          owner: nobody
-          group: nobody
+          mode: 0755
 
       - dst: /opt/openziti/bin/
         src: ./nfpm/zrok-share.bash
@@ -113,11 +114,8 @@ nfpms:
         file_info:
           mode: 0755
 
-      - dst: /opt/openziti/var/zrok/
+      - dst: /opt/openziti/etc/zrok/
         src: ./nfpm/zrok-share.env
 
-      - dst: /lib/systemd/system/
-        src: ./nfpm/zrok-share.service
-
-      - dst: /opt/openziti/share/
+      - dst: /opt/openziti/etc/zrok/
         src: ./etc/caddy/simple_reverse_proxy.Caddyfile
