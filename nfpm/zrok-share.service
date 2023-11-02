@@ -1,0 +1,16 @@
+[Unit]
+Description=zrok share
+After=network-online.target
+
+[Service]
+Type=simple
+Environment="HOME=/opt/openziti/var/zrok"
+User=nobody
+UMask=0007
+ExecStartPre=/opt/openziti/bin/zrok-enable.bash /opt/openziti/var/zrok/zrok-share.env
+ExecStart=/opt/openziti/bin/zrok-share.bash /opt/openziti/var/zrok/zrok-share.env
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
