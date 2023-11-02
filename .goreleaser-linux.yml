@@ -60,8 +60,8 @@ nfpms:
     homepage: https://zrok.io/
     maintainer: support@zrok.io
     description: |-
-      This package provides zrok-share.service. To enable, edit the "/opt/openziti/var/zroki/zrok-share.env" file with the
-      desired sharing configuration, and run "systemctl enable --now zrok-share.service".
+      This package provides zrok-share.service. To enable, edit the "/opt/openziti/etc/zrok/zrok-share.env" file with the
+      desired sharing configuration, and run "systemctl enable zrok-share.service && systemctl restart zrok-share.service".
     license: Apache 2.0
 
     # do not bundle the built binaries, only supporting files

@@ -74,7 +74,7 @@ else
   if [[ -n "${ZROK_OAUTH_PROVIDER:-}" ]]; then
     ZROK_CMD+=" --oauth-provider ${ZROK_OAUTH_PROVIDER}"
   fi
-  if [[ -n "${ZROK_OAUTH_EMAILS}" ]]; then
+  if [[ -n "${ZROK_OAUTH_EMAILS:-}" ]]; then
     for EMAIL in ${ZROK_OAUTH_EMAILS}; do
       if ! [[ ${EMAIL} =~ @ ]]; then
         echo "WARNING: '${EMAIL}' does not contain '@' so it may match more than one email domain!" >&2
