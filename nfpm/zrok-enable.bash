@@ -7,6 +7,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# set HOME to the first colon-sep dir in STATE_DIRECTORY inherited from systemd, e.g. /var/lib/zrok-share
+export HOME="${STATE_DIRECTORY%:*}" 
+
 if (( $# )); then
   if [[ -s "$1" ]]; then
     source "$1"

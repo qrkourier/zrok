@@ -4,8 +4,8 @@ After=network-online.target
 
 [Service]
 Type=simple
-Environment="HOME=/opt/openziti/var/zrok"
-User=nobody
+DynamicUser=yes
+StateDirectory=zrok-share
 UMask=0007
 ExecStartPre=/opt/openziti/bin/zrok-enable.bash /opt/openziti/var/zrok/zrok-share.env
 ExecStart=/opt/openziti/bin/zrok-share.bash /opt/openziti/var/zrok/zrok-share.env
