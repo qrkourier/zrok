@@ -19,7 +19,7 @@ if (( $# )); then
   if [[ -s "$1" ]]; then
     source "$1"
   else
-    echo "ERROR: $1 is empty or not readable" >&2
+    echo "ERROR: '$1' is empty or not readable" >&2
     exit 1
   fi
 else
@@ -37,7 +37,7 @@ fi
 if [[ -s ~/.zrok/reserved.json ]]; then
   ZROK_RESERVED_TOKEN="$(jq '.token' ~/.zrok/reserved.json 2>/dev/null)"
   if [[ -z "${ZROK_RESERVED_TOKEN}" || "${ZROK_RESERVED_TOKEN}" == null ]]; then
-    echo "ERROR: invalid reserved.json: $(jq -c . ~/.zrok/reserved.json)" >&2
+    echo "ERROR: invalid reserved.json: '$(jq -c . ~/.zrok/reserved.json)'" >&2
     exit 1
   else
     echo "INFO: zrok backend is already reserved: ${ZROK_RESERVED_TOKEN}"
@@ -51,19 +51,19 @@ else
     *Caddyfile)
         ZROK_BACKEND_MODE="caddy"
         if ! [[ -r "${ZROK_BACKEND}" ]]; then
-          echo "ERROR: ${ZROK_BACKEND} is not a readable Caddyfile" >&2
+          echo "ERROR: ZROK_BACKEND='${ZROK_BACKEND}' is not a readable Caddyfile" >&2
           exit 1
         fi
       ;;
     /*)
         ZROK_BACKEND_MODE="web"
         if ! [[ -d "${ZROK_BACKEND}" && -r "${ZROK_BACKEND}" ]]; then
-          echo "ERROR: ${ZROK_BACKEND} is not a readable directory" >&2
+          echo "ERROR: ZROK_BACKEND='${ZROK_BACKEND}' is not a readable directory" >&2
           exit 1
         fi
       ;;
     *)
-      echo "ERROR: ${ZROK_BACKEND} is not a valid backend" >&2
+      echo "ERROR: ZROK_BACKEND='${ZROK_BACKEND}' is not a valid backend" >&2
       exit 1
       ;;
   esac
@@ -87,19 +87,19 @@ else
 fi
 
 if ! [[ -s ~/.zrok/reserved.json ]]; then
-  echo "ERROR: empty or missing reserved.json" >&2
+  echo "ERROR: empty or missing $(realpath ~/.zrok)/reserved.json" >&2
   exit 1
 else
   ZROK_PUBLIC_URLS=$(jq -cr '.frontend_endpoints' ~/.zrok/reserved.json 2>/dev/null)
   if [[ -z "${ZROK_PUBLIC_URLS}" || "${ZROK_PUBLIC_URLS}" == null ]]; then
-    echo "ERROR: frontend endpoints not defined" >&2
+    echo "ERROR: frontend endpoints not defined in $(realpath ~/.zrok)/reserved.json" >&2
     exit 1
   else 
     echo "INFO: zrok public URLs: ${ZROK_PUBLIC_URLS}"
   fi
   ZROK_RESERVED_TOKEN=$(jq -r '.token' ~/.zrok/reserved.json 2>/dev/null)
   if [[ -z "${ZROK_RESERVED_TOKEN}" || "${ZROK_RESERVED_TOKEN}" == null ]]; then
-    echo "ERROR: zrok reservation token not defined" >&2
+    echo "ERROR: zrok reservation token not defined in $(realpath ~/.zrok)/reserved.json" >&2
     exit 1
   fi
   ZROK_CMD="share reserved ${ZROK_RESERVED_TOKEN} --headless --override-endpoint ${ZROK_BACKEND}"
