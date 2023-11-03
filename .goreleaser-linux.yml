@@ -120,3 +120,4 @@ nfpms:
 
       - dst: /opt/openziti/etc/zrok/
         src: ./etc/caddy/multiple_upstream.Caddyfile
+        type: config|noreplace
