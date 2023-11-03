@@ -48,7 +48,7 @@ else
     http://*|https://*)
         ZROK_BACKEND_MODE="proxy"
       ;;
-    *.Caddyfile)
+    *Caddyfile)
         ZROK_BACKEND_MODE="caddy"
         if ! [[ -r "${ZROK_BACKEND}" ]]; then
           echo "ERROR: ${ZROK_BACKEND} is not a readable Caddyfile" >&2
