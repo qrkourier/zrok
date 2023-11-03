@@ -119,4 +119,4 @@ nfpms:
         type: config|noreplace
 
       - dst: /opt/openziti/etc/zrok/
-        src: ./etc/caddy/simple_reverse_proxy.Caddyfile
+        src: ./etc/caddy/multiple_upstream.Caddyfile
