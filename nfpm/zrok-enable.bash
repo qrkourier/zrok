@@ -8,6 +8,7 @@ set -o nounset
 set -o pipefail
 
 BASENAME=$(basename "$0")
+DEFAULT_ZROK_ENVIRONMENT_NAME="zrok-share.service on $(hostname -s)"
 
 if (( $# )); then
   case $1 in
@@ -25,10 +26,14 @@ if [[ -n "${STATE_DIRECTORY:-}" ]]; then
   export HOME="${STATE_DIRECTORY%:*}"
 else
   # assume we're enabling for a system service, not a user service, if run outside systemd
-  export HOME="/var/lib/zrok-share"
+  export HOME="/var/lib/private/zrok-share"
 fi
 
-if ! [[ -d "${HOME}" && -w "${HOME}" ]]; then
+if ! [[ -d "${HOME}" ]]; then
+  mkdir --parents "${HOME}"
+fi
+
+if ! [[ -w "${HOME}" ]]; then
   echo "ERROR: HOME='${HOME}' is not a writeable directory" >&2
   exit 1
 fi
@@ -58,7 +63,6 @@ else
     exit 1
   fi
   if [[ -z "${ZROK_ENVIRONMENT_NAME:-}" ]]; then
-    DEFAULT_ZROK_ENVIRONMENT_NAME="zrok-share.service on $(hostname -s)"
     read -r -p "Enter zrok environment name [${DEFAULT_ZROK_ENVIRONMENT_NAME}]: " ZROK_ENVIRONMENT_NAME
     : "${ZROK_ENVIRONMENT_NAME:=${DEFAULT_ZROK_ENVIRONMENT_NAME}}"
   fi
@@ -76,5 +80,5 @@ if [[ -z "${ZROK_ENABLE_TOKEN}" ]]; then
 else
   zrok config set apiEndpoint "${ZROK_API_ENDPOINT:-https://api.zrok.io}"
   echo "INFO: running: zrok enable ..."
-  exec zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME}" "${ZROK_ENABLE_TOKEN}"
+  exec zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME:-${DEFAULT_ZROK_ENVIRONMENT_NAME}}" "${ZROK_ENABLE_TOKEN}"
 fi
