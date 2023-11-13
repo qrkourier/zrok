@@ -7,7 +7,7 @@ services:
       - sh
       - -euc
       - |
-        ZROK_UPSTREAM_URL="${ZROK_BACKEND:-http://zrok-test:9090}"
+        ZROK_UPSTREAM_URL="${ZROK_TARGET:-http://zrok-test:9090}"
         ZROK_UPSTREAM_HOST="$(echo $${ZROK_UPSTREAM_URL}|sed -E 's#^https?://([^/:]+).*#\1#')"
         mkdir -p /mnt/.zrok
         cat <<CADDYFILE >| /mnt/.zrok/Caddyfile
@@ -108,7 +108,7 @@ services:
             ZROK_CMD+=" --oauth-provider ${ZROK_OAUTH_PROVIDER}"
           fi
           if [[ -n "${ZROK_BACKEND_MODE:-}" && "${ZROK_BACKEND_MODE}" != caddy ]]; then
-            ZROK_CMD+=" --backend-mode ${ZROK_BACKEND_MODE} ${ZROK_BACKEND:-http://zrok-test:9090}"
+            ZROK_CMD+=" --backend-mode ${ZROK_BACKEND_MODE} ${ZROK_TARGET:-http://zrok-test:9090}"
           else
             ZROK_CMD+=" --backend-mode caddy /mnt/.zrok/Caddyfile"
           fi
