@@ -14,9 +14,8 @@ if (( $# )); then
   case $1 in
     -h|*help)
       echo -e \
-        "Usage: ${BASENAME} [filename|-]\n"\
-        "\tFILENAME\tfile containing environment variables to set\n"\
-        "\t-\t\tread environment variable assignments from stdin\n"
+        "Usage: ${BASENAME} FILENAME\n"\
+        "\tFILENAME\tfile containing environment variables to set"\
       exit 0
       ;;
   esac
@@ -55,10 +54,5 @@ if [[ -z "${ZROK_ENABLE_TOKEN}" ]]; then
 else
   zrok config set apiEndpoint "${ZROK_API_ENDPOINT:-https://api.zrok.io}"
   echo "INFO: running: zrok enable ..."
-  zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME:-${DEFAULT_ZROK_ENVIRONMENT_NAME}}" "${ZROK_ENABLE_TOKEN}"
-  # if running as root outside of systemd then fix statedir permissions so dynamicuser will be able to read when running
-  # inside systemd
-  if [[ -n "${UIDGID:-}" ]]; then
-    chown -R "${UIDGID}" "${HOME}"
-  fi
+  exec zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME:-${DEFAULT_ZROK_ENVIRONMENT_NAME}}" "${ZROK_ENABLE_TOKEN}"
 fi
