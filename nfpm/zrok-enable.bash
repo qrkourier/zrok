@@ -15,7 +15,7 @@ if (( $# )); then
     -h|*help)
       echo -e \
         "Usage: ${BASENAME} FILENAME\n"\
-        "\tFILENAME\tfile containing environment variables to set"\
+        "\tFILENAME\tfile containing environment variables to set"
       exit 0
       ;;
   esac
@@ -26,13 +26,13 @@ if [[ -n "${STATE_DIRECTORY:-}" ]]; then
   export HOME="${STATE_DIRECTORY%:*}"
 else
   echo "ERROR: STATE_DIRECTORY is undefined. This script must be run from systemd because it runs as a"\
-    " dynamically-allocated user and exclusively manages the files in STATE_DIRECTORY" >&2
+    "dynamically-allocated user and exclusively manages the files in STATE_DIRECTORY" >&2
   exit 1
 fi
 
 if [[ -s ~/.zrok/environment.json ]]; then
   echo "INFO: zrok environment is already enabled. Delete '$(realpath ~/.zrok/environment.json)' if you want to create a"\
-        " new environment."
+    "new environment."
   exit 0
 fi
 
