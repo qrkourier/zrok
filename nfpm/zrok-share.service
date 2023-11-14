@@ -1,5 +1,5 @@
 [Unit]
-Description=zrok share
+Description=zrok reserved public share service
 After=network-online.target
 
 [Service]
