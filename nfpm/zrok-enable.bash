@@ -7,6 +7,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+set -x
+
 BASENAME=$(basename "$0")
 DEFAULT_ZROK_ENVIRONMENT_NAME="zrok-share.service on $(hostname -s)"
 
@@ -27,21 +29,28 @@ if [[ -n "${STATE_DIRECTORY:-}" ]]; then
 else
   # assume we're enabling for a system service, not a user service, if run outside systemd
   export HOME="/var/lib/private/zrok-share"
-fi
-
-if ! [[ -d "${HOME}" ]]; then
-  mkdir --parents "${HOME}"
-fi
-
-if ! [[ -w "${HOME}" ]]; then
-  echo "ERROR: HOME='${HOME}' is not a writeable directory" >&2
-  exit 1
+  if ! [[ -d "${HOME}" ]]; then
+    systemctl start --no-block zrok-share.service
+    until [[ -d "${HOME}" || ${TRIES:=1} -gt 2 ]]; do
+      sleep 1
+      (( TRIES++ ))
+    done
+    systemctl stop --no-block zrok-share.service
+    if [[ -d "${HOME}" ]]; then
+      UIDGID=$(stat -c "%u:%g" "${HOME}")
+    else
+      echo "ERROR: HOME=${HOME} is not a directory" >&2
+      exit 1
+    fi
+  fi
 fi
 
 if [[ -s ~/.zrok/environment.json ]]; then
   echo "INFO: zrok environment is already enabled. Delete '$(realpath ~/.zrok/environment.json)' if you want to create a"\
         " new environment."
   exit 0
+else
+  echo "DEBUG: $(id) HOME=${HOME} $(stat ~/.zrok/)"
 fi
 
 if (( $# )); then
@@ -80,5 +89,10 @@ if [[ -z "${ZROK_ENABLE_TOKEN}" ]]; then
 else
   zrok config set apiEndpoint "${ZROK_API_ENDPOINT:-https://api.zrok.io}"
   echo "INFO: running: zrok enable ..."
-  exec zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME:-${DEFAULT_ZROK_ENVIRONMENT_NAME}}" "${ZROK_ENABLE_TOKEN}"
+  zrok enable --headless --description "${ZROK_ENVIRONMENT_NAME:-${DEFAULT_ZROK_ENVIRONMENT_NAME}}" "${ZROK_ENABLE_TOKEN}"
+  # if running as root outside of systemd then fix statedir permissions so dynamicuser will be able to read when running
+  # inside systemd
+  if [[ -n "${UIDGID:-}" ]]; then
+    chown -R "${UIDGID}" "${HOME}"
+  fi
 fi
