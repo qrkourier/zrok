@@ -95,8 +95,16 @@ nfpms:
     dependencies:
       - zrok
 
+    # this allows users to satisfy the requirement for jq another way, not with the package manager, e.g.
+    # apt install --no-recommends zrok-share
     recommends:
       - jq
+
+    overrides:
+      # yum and dnf do not automatically install "weak deps" aka "recommends", so we need to add them as a dependency
+      rpm:
+        depends:
+          - jq
 
     # Contents to add to the package.
     contents:
