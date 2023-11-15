@@ -99,7 +99,7 @@ nfpms:
     overrides:
       # yum and dnf do not automatically install "weak deps" aka "recommends", so we need to add them as a dependency
       rpm:
-        depends:
+        dependencies:
           - jq
 
     # Contents to add to the package.
