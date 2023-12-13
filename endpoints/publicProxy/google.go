@@ -80,7 +80,7 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 		return func(w http.ResponseWriter, r *http.Request) {
 			host, err := url.QueryUnescape(r.URL.Query().Get("targethost"))
 			if err != nil {
-				logrus.Errorf("Unable to unescape target host: %v", err)
+				logrus.Errorf("unable to unescape target host: %v", err)
 			}
 			rp.AuthURLHandler(func() string {
 				id := uuid.New().String()
@@ -99,7 +99,7 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 				})
 				s, err := t.SignedString(key)
 				if err != nil {
-					logrus.Errorf("Unable to sign intermediate JWT: %v", err)
+					logrus.Errorf("unable to sign intermediate JWT: %v", err)
 				}
 				return s
 			}, party, rp.WithURLParam("access_type", "offline"))(w, r)
@@ -110,7 +110,7 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 	getEmail := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty) {
 		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(tokens.AccessToken))
 		if err != nil {
-			logrus.Error("Error getting user info from google: " + err.Error() + "\n")
+			logrus.Error("error getting user info from google: " + err.Error() + "\n")
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -119,15 +119,15 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 		}()
 		response, err := io.ReadAll(resp.Body)
 		if err != nil {
-			logrus.Errorf("Error reading response body: %v", err)
+			logrus.Errorf("error reading response body: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		logrus.Infof("Response from google userinfo endpoint: %s", string(response))
+		logrus.Infof("response from google userinfo endpoint: %s", string(response))
 		rDat := googleOauthEmailResp{}
 		err = json.Unmarshal(response, &rDat)
 		if err != nil {
-			logrus.Errorf("Error unmarshalling google oauth response: %v", err)
+			logrus.Errorf("error unmarshalling google oauth response: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -152,7 +152,7 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 			host = cfg.CookieDomain
 		}
 		host = strings.Split(host, "/")[0]
-		logrus.Debugf("Setting zrok-access cookie JWT audience: " + host)
+		logrus.Debugf("setting zrok-access cookie JWT audience: " + host)
 		SetZrokCookie(w, cfg.CookieDomain, rDat.Email, tokens.AccessToken, "google", authCheckInterval, key, host)
 		http.Redirect(w, r, fmt.Sprintf("%s://%s", scheme, token.Claims.(*IntermediateJWT).Host), http.StatusFound)
 	}

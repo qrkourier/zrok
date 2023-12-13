@@ -211,7 +211,7 @@ func authHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Contex
 								if provider, found := oauthCfg.(map[string]interface{})["provider"]; found {
 									var authCheckInterval time.Duration
 									if checkInterval, found := oauthCfg.(map[string]interface{})["authorization_check_interval"]; !found {
-										logrus.Errorf("Missing authorization check interval in share config. Defaulting to 3 hours")
+										logrus.Errorf("missing authorization check interval in share config. Defaulting to 3 hours")
 										authCheckInterval = 3 * time.Hour
 									} else {
 										i, err := time.ParseDuration(checkInterval.(string))
@@ -256,7 +256,7 @@ func authHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Contex
 									// Add check for 'aud' claim
 									requestedHost := r.Header.Get("Host")
 									if claims.Audience != requestedHost {
-										logrus.Errorf("JWT audience claim does not match requested host : aud = %v, host = %v", claims.Audience, requestedHost)
+										logrus.Errorf("audience claim in JWT does not match requested host : aud = %v, host = %v", claims.Audience, requestedHost)
 										oauthLoginRequired(w, r, pcfg.Oauth, provider.(string), target, authCheckInterval)
 										return
 									}
