@@ -253,6 +253,13 @@ func authHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Contex
 										oauthLoginRequired(w, r, pcfg.Oauth, provider.(string), target, authCheckInterval)
 										return
 									}
+									// Add check for 'aud' claim
+									requestedHost := r.Header.Get("Host")
+									if claims.Audience != requestedHost {
+										logrus.Errorf("JWT audience claim does not match requested host : aud = %v, host = %v", claims.Audience, requestedHost)
+										oauthLoginRequired(w, r, pcfg.Oauth, provider.(string), target, authCheckInterval)
+										return
+									}
 									if validDomains, found := oauthCfg.(map[string]interface{})["email_domains"]; found {
 										if castedDomains, ok := validDomains.([]interface{}); !ok {
 											logrus.Error("invalid email domain format")
@@ -313,15 +320,17 @@ type ZrokClaims struct {
 	Email                      string        `json:"email"`
 	AccessToken                string        `json:"accessToken"`
 	Provider                   string        `json:"provider"`
+	Audience				   string        `json:"aud"`
 	AuthorizationCheckInterval time.Duration `json:"authorizationCheckInterval"`
 	jwt.RegisteredClaims
 }
 
-func SetZrokCookie(w http.ResponseWriter, domain, email, accessToken, provider string, checkInterval time.Duration, key []byte) {
+func SetZrokCookie(w http.ResponseWriter, domain, email, accessToken, provider string, checkInterval time.Duration, key []byte, targethost string) {
 	tkn := jwt.NewWithClaims(jwt.SigningMethodHS256, ZrokClaims{
 		Email:                      email,
 		AccessToken:                accessToken,
 		Provider:                   provider,
+		Audience:                   targethost,
 		AuthorizationCheckInterval: checkInterval,
 	})
 	sTkn, err := tkn.SignedString(key)

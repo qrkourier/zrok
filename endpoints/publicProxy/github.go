@@ -5,6 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -13,10 +19,6 @@ import (
 	"github.com/zitadel/oidc/v2/pkg/oidc"
 	"golang.org/x/oauth2"
 	githubOAuth "golang.org/x/oauth2/github"
-	"io"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 func configureGithubOauth(cfg *OauthConfig, tls bool) error {
@@ -165,8 +167,13 @@ func configureGithubOauth(cfg *OauthConfig, tls bool) error {
 		} else {
 			authCheckInterval = i
 		}
-
-		SetZrokCookie(w, cfg.CookieDomain, primaryEmail, tokens.AccessToken, "github", authCheckInterval, key)
+		host := token.Claims.(*IntermediateJWT).Host
+		if host == "" {
+			host = cfg.CookieDomain
+		}
+		host = strings.Split(host, "/")[0]
+		logrus.Debugf("Setting zrok-access cookie JWT audience: " + host)
+		SetZrokCookie(w, cfg.CookieDomain, primaryEmail, tokens.AccessToken, "github", authCheckInterval, key, host)
 		http.Redirect(w, r, fmt.Sprintf("%s://%s", scheme, token.Claims.(*IntermediateJWT).Host), http.StatusFound)
 	}
 

@@ -152,8 +152,8 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 			host = cfg.CookieDomain
 		}
 		host = strings.Split(host, "/")[0]
-		logrus.Debugf("Setting zrok-access cookie for domain: " + host)
-		SetZrokCookie(w, host, rDat.Email, tokens.AccessToken, "google", authCheckInterval, key)
+		logrus.Debugf("Setting zrok-access cookie JWT audience: " + host)
+		SetZrokCookie(w, cfg.CookieDomain, rDat.Email, tokens.AccessToken, "google", authCheckInterval, key, host)
 		http.Redirect(w, r, fmt.Sprintf("%s://%s", scheme, token.Claims.(*IntermediateJWT).Host), http.StatusFound)
 	}
 
