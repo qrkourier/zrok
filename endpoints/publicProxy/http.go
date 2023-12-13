@@ -255,11 +255,22 @@ func authHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Contex
 									}
 									// Add check for 'aud' claim
 									requestedHost := r.Header.Get("Host")
+									if requestedHost == "" {
+										logrus.Debug("host header is missing. Here are the present headers:")
+										for name, values := range r.Header {
+											// Loop over all values for the name.
+											for _, value := range values {
+												logrus.Debugf("%s: %s", name, value)
+											}
+										}
+									}
+
 									if claims.Audience != requestedHost {
 										logrus.Errorf("audience claim in JWT does not match requested host : aud = %v, host = %v", claims.Audience, requestedHost)
 										oauthLoginRequired(w, r, pcfg.Oauth, provider.(string), target, authCheckInterval)
 										return
 									}
+
 									if validDomains, found := oauthCfg.(map[string]interface{})["email_domains"]; found {
 										if castedDomains, ok := validDomains.([]interface{}); !ok {
 											logrus.Error("invalid email domain format")
