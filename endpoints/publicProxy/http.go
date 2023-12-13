@@ -337,7 +337,9 @@ func SetZrokCookie(w http.ResponseWriter, domain, email, accessToken, provider s
 		Domain:  domain,
 		Path:    "/",
 		Expires: time.Now().Add(checkInterval),
-		//Secure:  true, //When tls gets added have this be configured on if tls
+		// Secure:  true, //When tls gets added have this be configured on if tls
+		// HttpOnly: true,
+		// SameSite: http.SameSiteStrictMode,
 	})
 }
 

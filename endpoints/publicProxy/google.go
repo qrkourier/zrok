@@ -5,6 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -13,10 +19,6 @@ import (
 	"github.com/zitadel/oidc/v2/pkg/oidc"
 	"golang.org/x/oauth2"
 	googleOauth "golang.org/x/oauth2/google"
-	"io"
-	"net/http"
-	"net/url"
-	"time"
 )
 
 func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
@@ -145,8 +147,13 @@ func configureGoogleOauth(cfg *OauthConfig, tls bool) error {
 		} else {
 			authCheckInterval = i
 		}
-
-		SetZrokCookie(w, cfg.CookieDomain, rDat.Email, tokens.AccessToken, "google", authCheckInterval, key)
+		host := token.Claims.(*IntermediateJWT).Host
+		if host == "" {
+			host = cfg.CookieDomain
+		}
+		host = strings.Split(host, "/")[0]
+		logrus.Debugf("Setting zrok-access cookie for domain: " + host)
+		SetZrokCookie(w, host, rDat.Email, tokens.AccessToken, "google", authCheckInterval, key)
 		http.Redirect(w, r, fmt.Sprintf("%s://%s", scheme, token.Claims.(*IntermediateJWT).Host), http.StatusFound)
 	}
 
