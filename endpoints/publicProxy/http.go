@@ -253,12 +253,18 @@ func authHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Contex
 										oauthLoginRequired(w, r, pcfg.Oauth, provider.(string), target, authCheckInterval)
 										return
 									}
+
 									// Add check for 'aud' claim
-									requestedHost := r.Header.Get("Host")
+									var requestedHost string
+									if host := r.Header.Get("Host"); host != "" {
+										requestedHost = host
+									} else if xForwardedHost := r.Header.Get("X-Forwarded-Host"); xForwardedHost != "" {
+										requestedHost = xForwardedHost
+									}
+
 									if requestedHost == "" {
-										logrus.Debug("host header is missing. Here are the present headers:")
+										logrus.Debug("all checked headers (Host, X-Forwarded-Host) are missing. Here are the present headers:")
 										for name, values := range r.Header {
-											// Loop over all values for the name.
 											for _, value := range values {
 												logrus.Debugf("%s: %s", name, value)
 											}
