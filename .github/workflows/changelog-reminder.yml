@@ -11,7 +11,7 @@ jobs:
     - name: Changelog Reminder
       uses: netfoundry/action-changelog-reminder@main
       with:
-        changelog_regex: '/CHANGELOG\.md/'
-        customPrMessage: 'Please update CHANGELOG.md if appropriate.'
+        changelog_regex: CHANGELOG\.md
+        customPrMessage: Did you forget to update CHANGELOG.md?
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
