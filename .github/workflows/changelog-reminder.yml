@@ -1,5 +1,6 @@
 on: pull_request
 name: Changelog Reminder
+permissions: read-all
 jobs:
   remind:
     name: Changelog Reminder
