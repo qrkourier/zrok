@@ -65,6 +65,10 @@ ZROK_ADMIN_TOKEN=zroktoken
 
 ```bash title=".env options"
 # Caddy TLS option: rename compose.caddy.yml to compose.override.yml and set these vars; allow 80,443 in firewall
+
+#
+## set these in .env for providers other than Route53
+#
 # plugin name for your DNS provider
 CADDY_DNS_PLUGIN=cloudflare
 # API token from your DNS provider
@@ -72,22 +76,34 @@ CADDY_DNS_PLUGIN_TOKEN=abcd1234
 # use the staging API until you're sure everything is working to avoid hitting the rate limit
 CADDY_ACME_API=https://acme-staging-v02.api.letsencrypt.org/directory
 
-# no TLS option: publish the insecure ports to the internet and allow them in the firewall 
-ZROK_INSECURE_INTERFACE=0.0.0.0
+#
+## set these in .env for Route53
+#
+# AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+# AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+# AWS_REGION: ${AWS_REGION}
+# AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}  # if temporary credential, e.g., from STS
+
+#
+## if not using Caddy for TLS, uncomment to publish the insecure ports to the internet
+#
+#ZROK_INSECURE_INTERFACE=0.0.0.0
+
+# these insecure ports must be proxied with TLS for security
 ZROK_CTRL_PORT=18080
 ZROK_FRONTEND_PORT=8080
 ZROK_OAUTH_PORT=8081
 
-# ziti ports must be published to the internet and allowed by firewall
-ZITI_CTRL_ADVERTISED_PORT=1280
+# these secure ziti ports must be published to the internet
+ZITI_CTRL_ADVERTISED_PORT=80
 ZITI_ROUTER_PORT=3022
 
-# configure oauth for public shares
-ZROK_OAUTH_HASH_KEY=oauthhashkeysecret
-ZROK_OAUTH_GITHUB_CLIENT_ID=abcd1234
-ZROK_OAUTH_GITHUB_CLIENT_SECRET=abcd1234
-ZROK_OAUTH_GOOGLE_CLIENT_ID=abcd1234
-ZROK_OAUTH_GOOGLE_CLIENT_SECRET=abcd1234
+# optionally configure oauth for public shares
+#ZROK_OAUTH_HASH_KEY=oauthhashkeysecret
+#ZROK_OAUTH_GITHUB_CLIENT_ID=abcd1234
+#ZROK_OAUTH_GITHUB_CLIENT_SECRET=abcd1234
+#ZROK_OAUTH_GOOGLE_CLIENT_ID=abcd1234
+#ZROK_OAUTH_GOOGLE_CLIENT_SECRET=abcd1234
 
 # zrok version, e.g., 1.0.0
 ZROK_CLI_TAG=latest
@@ -157,13 +173,12 @@ The `ziti-quickstart` and `caddy` containers publish ports to all devices that u
 #### Required
 
 1. `443/tcp` - reverse proxy handles HTTPS requests for zrok API, OAuth, and public shares (published by container `caddy`)
-1. `1280/tcp` - ziti ctrl plane (published by container `ziti-quickstart`)
+1. `80/tcp` - ziti ctrl plane (published by container `ziti-quickstart`)
 1. `3022/tcp` - ziti data plane (published by container `ziti-quickstart`)
 
-#### Optional
-
-1. `80/tcp` - reverse proxy redirects non-HTTPS requests to `443/tcp` (published by container `caddy`)
 <!-- 1. 443/udp used by Caddy for HTTP/3 QUIC protocol (published by container `caddy`) -->
+
+See "My internet connection can only send traffic to common ports" below about changing the required ports.
 
 ### Troubleshooting
 
@@ -175,7 +190,7 @@ The `ziti-quickstart` and `caddy` containers publish ports to all devices that u
     docker compose logs zrok-controller
     ```
 
-1. Check the caddy logs.
+1. Check the Caddy logs.
 
     It can take a few minutes for Caddy to obtain the wildcard certificate. You can check the logs to see if there were any errors completing the DNS challenge which involves using the Caddy DNS plugin to create a TXT record in your DNS zone. This leverages the API token you provided in the `.env` file, which must have permission to create DNS records in the zrok DNS zone.
 
@@ -183,6 +198,23 @@ The `ziti-quickstart` and `caddy` containers publish ports to all devices that u
     docker compose logs caddy
     ```
 
+1. Caddy keeps failing to obtain a wildcard certificate because it timed out waiting for DNS.
+
+    Symptom: the Caddy log contains "timed out waiting for record to fully propagate." This means that Caddy added a DNS record with your DNS provider's API to prove to the CA it controls the zrok DNS zone, but it wasn't able to verify the record was created successfully with a DNS query.
+
+    Solutions:
+
+    - Add `propagation_delay` in your `Caddyfile` to delay the first DNS verification query. This avoids caching a verification query failure by waiting a few minutes for the record to become available so the verification query will succeed on the first attempt. Caddy will be unable to verify the DNS record if the failure remains in the cache too long.
+    - If the prior solution fails, you can override the default resolves/nameservers with `resolvers`, a space-separated list of DNS servers. This gives you more control over if and where the verification query result is cached.
+
+    ```
+    tls {
+        dns {CADDY_DNS_PLUGIN} {CADDY_DNS_PLUGIN_TOKEN}
+		propagation_timeout 60m  # default 2m
+        propagation_delay   5m   # default 0m
+    }
+    ```
+    
 1. `zrok enable` fails certificate verification: ensure you are not using the staging API for Let's Encrypt.
 
     If you are using the staging API, you will see an error about the API certificate when you use the zrok CLI. You can switch to the production API by removing the overriding assignment of the `CADDY_ACME_API` variable.
@@ -222,21 +254,19 @@ The `ziti-quickstart` and `caddy` containers publish ports to all devices that u
     docker compose exec caddy curl http://localhost:2019/config/ | jq
     ```
 
-1. My provider, e.g., Route53 doesn't give me a single API token.
+1. My DNS provider credential is composed of several values, not a single API token.
 
-    As long as your DNS provider is supported by Caddy then it will work. You can modify the Caddyfile to use a different set of properties than the example. Here's how the `tls` section should look for Route53. You must declare any environment variables introduced in the `.env` file in `docker.compose.override` on the `caddy` service to ensure they are passed through to the Caddy container.
+    As long as your DNS provider is supported by Caddy then it will work. Here's a checklist for DNS providers like Route53 with credentials expressed as multiple values, e.g., `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
 
-    ```json
-    tls {
-      dns {$CADDY_DNS_PLUGIN} {
-        access_key_id {$AWS_ACCESS_KEY_ID}
-        secret_access_key {$AWS_SECRET_ACCESS_KEY}
-      }
-    }
-    ```
+    1. Define env vars in `.env` file.
+    1. Declare env vars in `compose.override.yml` file on `caddy`'s `environment`.
+    1. Modify `Caddyfile` according to the DNS plugin author's instructions ([link to Route53 README](https://github.com/caddy-dns/route53)). This means modifying the `Caddyfile` to reference the env vars. The provided file `route53.Caddyfile` serves as an example.
+
+1. My internet connection can only send traffic to common ports like 80, 443, and 3389.
+
+    You can change the required ports in the `.env` file. Caddy will still use port 443 for zrok shares and API if you renamed `compose.caddy.yml` as `compose.override.yml` to enable Caddy.
 
     ```bash title=".env"
-    CADDY_DNS_PLUGIN=route53
-    AWS_ACCESS_KEY_ID=abcd1234
-    AWS_SECRET_ACCESS_KEY=abcd1234
+    ZITI_CTRL_ADVERTISED_PORT=80
+    ZITI_ROUTER_PORT=3389
     ```
