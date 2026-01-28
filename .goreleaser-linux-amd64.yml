@@ -92,6 +92,9 @@ nfpms:
         file_info:
           mode: 0755
 
+      - dst: /etc/zrok2/ctrl.yml.example
+        src: ./etc/ctrl.yml
+
       - dst: /etc/zrok2
         type: dir
         file_info:
@@ -134,6 +137,9 @@ nfpms:
         file_info:
           mode: 0755
 
+      - dst: /etc/zrok2/ctrl.yml.example
+        src: ./etc/ctrl.yml
+
       - dst: /etc/zrok2
         type: dir
         file_info:
@@ -175,6 +181,9 @@ nfpms:
         src: ./nfpm/zrok2-frontend.bash
         file_info:
           mode: 0755
+
+      - dst: /etc/zrok2/frontend.yml.example
+        src: ./etc/frontend.yml
 
       - dst: /etc/zrok2
         type: dir
