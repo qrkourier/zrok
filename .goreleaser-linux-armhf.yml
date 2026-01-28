@@ -108,7 +108,9 @@ nfpms:
       - dst: /etc/zrok2
         type: dir
         file_info:
-          mode: 0750
+          mode: 0755
+          owner: root
+          group: root
 
   - package_name: zrok2-metrics
     id: zrok-metrics
@@ -194,7 +196,9 @@ nfpms:
       - dst: /etc/zrok2
         type: dir
         file_info:
-          mode: 0750
+          mode: 0755
+          owner: root
+          group: root
 
   - package_name: zrok2-agent
     id: zrok-agent
