@@ -105,6 +105,10 @@ nfpms:
 
       - dst: /etc/zrok2/ctrl.yml.example
         src: ./etc/ctrl.yml
+        file_info:
+          mode: 0640
+          owner: zrok-controller
+          group: zrok-controller
 
       - dst: /etc/zrok2
         type: dir
@@ -153,6 +157,10 @@ nfpms:
 
       - dst: /etc/zrok2/ctrl.yml.example
         src: ./etc/ctrl.yml
+        file_info:
+          mode: 0640
+          owner: zrok-controller
+          group: zrok-controller
 
       - dst: /etc/zrok2
         type: dir
@@ -201,6 +209,10 @@ nfpms:
 
       - dst: /etc/zrok2/frontend.yml.example
         src: ./etc/frontend.yml
+        file_info:
+          mode: 0640
+          owner: zrok-frontend
+          group: zrok-frontend
 
       - dst: /etc/zrok2
         type: dir
