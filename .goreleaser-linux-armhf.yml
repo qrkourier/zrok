@@ -87,11 +87,14 @@ nfpms:
       - zrok2
 
     scripts:
-      postinstall: ./nfpm/postinstall.bash
+      postinstall: ./nfpm/postinstall-controller.bash
 
     contents:
       - dst: /lib/systemd/system/
         src: ./nfpm/zrok2-controller.service
+
+      - dst: /usr/share/zrok2/
+        src: ./nfpm/postinstall-common.bash
 
       - dst: /usr/bin/zrok2-controller.bash
         src: ./nfpm/zrok2-controller.bash
@@ -132,11 +135,14 @@ nfpms:
       - zrok2
 
     scripts:
-      postinstall: ./nfpm/postinstall.bash
+      postinstall: ./nfpm/postinstall-metrics.bash
 
     contents:
       - dst: /lib/systemd/system/
         src: ./nfpm/zrok2-metrics.service
+
+      - dst: /usr/share/zrok2/
+        src: ./nfpm/postinstall-common.bash
 
       - dst: /usr/bin/zrok2-metrics-bridge.bash
         src: ./nfpm/zrok2-metrics-bridge.bash
@@ -177,11 +183,14 @@ nfpms:
       - zrok2
 
     scripts:
-      postinstall: ./nfpm/postinstall.bash
+      postinstall: ./nfpm/postinstall-frontend.bash
 
     contents:
       - dst: /lib/systemd/system/
         src: ./nfpm/zrok2-frontend.service
+
+      - dst: /usr/share/zrok2/
+        src: ./nfpm/postinstall-common.bash
 
       - dst: /usr/bin/zrok2-frontend.bash
         src: ./nfpm/zrok2-frontend.bash
