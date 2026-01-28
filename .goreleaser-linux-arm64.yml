@@ -145,18 +145,6 @@ nfpms:
         file_info:
           mode: 0755
 
-      - dst: /etc/zrok2/ctrl.yml.example
-        src: ./etc/ctrl.yml
-        file_info:
-          mode: 0640
-          owner: zrok-controller
-          group: zrok-controller
-
-      - dst: /etc/zrok2
-        type: dir
-        file_info:
-          mode: 0750
-
   - package_name: zrok2-frontend
     id: zrok-frontend
     vendor: NetFoundry
