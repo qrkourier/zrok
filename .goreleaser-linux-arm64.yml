@@ -247,3 +247,7 @@ nfpms:
     contents:
       - dst: /usr/lib/systemd/user/
         src: ./nfpm/zrok2-agent.service
+
+      - dst: /etc/zrok2/
+        src: ./etc/caddy/multiple_upstream.Caddyfile
+        type: config|noreplace
