@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# this script uses a zrok enable token to enable a zrok environment in $HOME/.zrok2
+# this script uses a zrok2 enable token to enable a zrok2 environment in $HOME/.zrok2
 #
 
 set -o errexit
@@ -27,10 +27,10 @@ if [[ -n "${STATE_DIRECTORY:-}" ]]; then
 else
   echo "WARNING: STATE_DIRECTORY is undefined. Using HOME=${HOME}" >&2
 fi
-echo "DEBUG: zrok state directory is ${HOME}/.zrok2"
+echo "DEBUG: zrok2 state directory is ${HOME}/.zrok2"
 
 if [[ -s ~/.zrok2/environment.json ]]; then
-  echo "INFO: zrok environment is already enabled. Delete '$(realpath ~/.zrok2/environment.json)' if you want to create a"\
+  echo "INFO: zrok2 environment is already enabled. Delete '$(realpath ~/.zrok2/environment.json)' if you want to create a"\
     "new environment."
   exit 0
 fi
