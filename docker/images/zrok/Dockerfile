@@ -25,8 +25,9 @@ COPY ./LICENSE /licenses/apache.txt
 
 RUN mkdir -p /usr/local/bin
 COPY --chmod=0755 ${ARTIFACTS_DIR}/${TARGETARCH}/${TARGETOS}/zrok2 \
-      ./nfpm/zrok2-enable.bash \
       /usr/local/bin/
+COPY --chmod=0755 ./nfpm/zrok2-enable.bash \
+      /usr/local/bin/zrok2-enable
 
 USER ziggy
 ENTRYPOINT [ "zrok2" ]

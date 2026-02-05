@@ -250,6 +250,11 @@ nfpms:
       - dst: /usr/lib/systemd/user/
         src: ./nfpm/zrok2-agent.service
 
+      - dst: /usr/bin/zrok2-enable
+        src: ./nfpm/zrok2-enable.bash
+        file_info:
+          mode: 0755
+
       - dst: /etc/zrok2/
         src: ./etc/caddy/multiple_upstream.Caddyfile
         type: config|noreplace
